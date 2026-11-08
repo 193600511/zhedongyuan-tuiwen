@@ -1,0 +1,117 @@
+<!--
+  浙江东方职业技术学院 · 标准推文模板
+  使用方法：替换所有 {{占位符}}，删除用不到的区块；每段小标题组件可按需增删
+  已内置规范：17px / 系统默认字体 / 行距1.75 / 字距0 / 图片段前后8px / 首行缩进2em / 两端对齐
+  落款固定：一审孙舒 / 二审吴昕灿 / 三审武德力；编 辑填当期撰稿人
+-->
+<section>
+    <p>
+        <img src="{{HEADER_GIF}}" style="width:100%;display:block;border-radius:initial;" data-width="100%"/><br/>
+    </p>
+</section>
+<section style="font-size:17px;color:#3e3e3e;line-height:1.75;letter-spacing:0;padding:18px 14px;word-break:break-word;box-sizing:border-box;background:#faf6f1;border-radius:14px;">
+    <!-- 栏目标签（可选） -->
+    <section style="text-align:center;margin:8px 0 12px;">
+        <span style="display:inline-block;padding:4px 16px;border-radius:20px;background:#7a5c52;color:#fff;font-size:13px;letter-spacing:2px;">{{TAG}}</span>
+    </section><!-- 主标题 -->
+    <section style="margin:8px 0;padding:16px 14px;border-radius:12px;background:#6c6d43;text-align:center;box-shadow:0 2px 6px #6c6d434c;">
+        <section style="font-size:24px;font-weight:bold;color:#fdf9f0;letter-spacing:4px;line-height:1.4;">
+            {{TITLE}}
+        </section>
+    </section>
+    <section style="text-align:center;font-size:14px;color:#7a5c52;letter-spacing:3px;margin:8px 0 16px;">
+        {{SUBTITLE}}
+    </section><!-- 导语 -->
+    <section style="margin:8px 0;padding:14px 16px;border-radius:10px;background:#f3eeea;border-left:4px solid #b79481;box-sizing:border-box;">
+        <section style="font-size:17px;color:#3e3e3e;line-height:1.75;letter-spacing:0;text-indent:2em;text-align:justify;">
+            {{INTRO}}
+        </section>
+    </section><!-- ===== 小标题（编号+文字同字号，左右对称装饰；复制本组件改编号与标题）===== -->
+    <svg data-width="100%" style="max-width:100%;display:inline-block;width:100%;vertical-align:top;line-height:1.6;overflow:visible;box-sizing:border-box;" viewBox="0 0 330 56" xmlns="http://www.w3.org/2000/svg">
+        <foreignObject height="100%" width="100%">
+            <section style="overflow:hidden;margin-bottom:unset;">
+                <section style="display:flex;align-items:center;justify-content:center;padding:0.5em 0;box-sizing:border-box;">
+                    <section style="flex:0 0 auto;display:flex;align-items:center;">
+                        <span style="display:inline-block;width:24px;height:1px;background-color:#cbb3a0;"></span>
+                        <span style="display:inline-block;width:4px;height:4px;border-radius:100%;background-color:#b79481;margin-left:4px;"></span>
+                    </section>
+                    <section style="flex:0 0 auto;width:2.2em;height:2.2em;line-height:2.2em;font-size:1em;border-radius:100%;background-color:#7a5c52;color:#ffffff;text-align:center;margin:0 0.5em;box-shadow:0 2px 6px #7a5c5240;">一</section>
+                    <section style="flex:0 0 auto;font-size:1em;line-height:1.6;color:#544439;letter-spacing:1px;"><strong>{{SECTION_1}}</strong></section>
+                    <section style="flex:0 0 auto;display:flex;align-items:center;">
+                        <span style="display:inline-block;width:4px;height:4px;border-radius:100%;background-color:#b79481;margin-left:0.5em;margin-right:4px;"></span>
+                        <span style="display:inline-block;width:24px;height:1px;background-color:#cbb3a0;"></span>
+                    </section>
+                </section>
+            </section>
+        </foreignObject>
+    </svg><!-- 单图卡（复制改图与图注） -->
+    <section style="margin:8px 0 8px 10px;">
+        <section style="padding:12px 12px 18px;box-shadow:0 4px 15px #00000019;background-color:#ffffff;box-sizing:border-box;">
+            <p>
+                <img src="{{IMAGE_1}}" style="width:100%;display:block;border-radius:initial;" data-width="100%"/>
+            </p>
+        </section>
+    </section>
+    <section style="text-align:center;font-size:12px;color:#888;letter-spacing:0;margin:8px 0;">
+        {{CAPTION_1}}
+    </section>
+    <section style="font-size:17px;color:#3e3e3e;line-height:1.75;letter-spacing:0;margin:8px 0;text-indent:2em;text-align:justify;">
+        {{PARAGRAPH_1}}
+    </section><!-- ===== 双图拍立得卡（可选；复制改两张图）===== -->
+    <section style="margin:8px 0;">
+        <section style="display:flex;justify-content:center;align-items:flex-start;margin-bottom:unset;">
+            <section style="width:46%;padding:8px 8px 16px;box-shadow:0 4px 12px #00000014;background:#ffffff;box-sizing:border-box;transform:rotateZ(-3deg);" data-width="46%">
+                <p>
+                    <img src="{{IMAGE_2A}}" style="width:100%;display:block;border-radius:initial;" data-width="100%"/>
+                </p>
+            </section>
+            <section style="width:46%;padding:8px 8px 16px;box-shadow:0 4px 12px #00000014;margin-left:-6px;margin-top:24px;background:#ffffff;box-sizing:border-box;transform:rotateZ(2deg);" data-width="46%">
+                <p>
+                    <img src="{{IMAGE_2B}}" style="width:100%;display:block;border-radius:initial;" data-width="100%"/>
+                </p>
+            </section>
+        </section>
+    </section>
+    <section style="text-align:center;font-size:12px;color:#888;letter-spacing:0;margin:8px 0;">
+        {{CAPTION_2}}
+    </section>
+    <section style="font-size:17px;color:#3e3e3e;line-height:1.75;letter-spacing:0;margin:8px 0;text-indent:2em;text-align:justify;">
+        {{PARAGRAPH_2}}
+    </section><!-- ===== 金句（强调 18px，可选）===== -->
+    <section style="margin:8px 0;padding:14px 18px;border-left:4px solid #b79481;background:#f7efe8;border-radius:0 8px 8px 0;">
+        <section style="font-size:18px;color:#7a5c52;line-height:1.75;letter-spacing:0;font-weight:bold;">
+            {{QUOTE}}
+        </section>
+    </section><!-- ===== END 分割线 ===== -->
+    <svg data-width="100%" style="max-width:100%;display:inline-block;width:100%;vertical-align:top;line-height:1.6;overflow:visible;box-sizing:border-box;" viewBox="0 0 375 36" xmlns="http://www.w3.org/2000/svg">
+        <foreignObject height="100%" width="100%">
+            <section style="overflow:hidden;margin-bottom:unset;">
+                <section style="display:flex;align-items:center;justify-content:center;margin-bottom:unset;padding:0.4em 0;">
+                    <span style="display:inline-block;width:36px;height:1px;background:#b79481;margin-right:12px;"></span><span style="letter-spacing:0.25em;font-size:0.95em;color:#7a5c52;font-weight:bold;">END</span><span style="display:inline-block;width:36px;height:1px;background:#b79481;margin-left:12px;"></span>
+                </section>
+            </section>
+        </foreignObject>
+    </svg>
+</section><!-- ===== 落款（固定三审；编 辑 = 当期撰稿人）===== -->
+<p style="margin-top:24px;letter-spacing:0.544px;line-height:1.5em;">
+    <span style="font-size:12px;color:#888888;letter-spacing:0.544px;line-height:24px;">来 源&nbsp;&nbsp;| {{SOURCE}}</span>
+</p>
+<section style="color:#3f3f3f;margin-bottom:unset;letter-spacing:0.544px;">
+    <p style="margin-bottom:unset;color:#222222;letter-spacing:0.544px;font-size:16px;line-height:1.5em;">
+        <span style="color:#888888;font-size:12px;letter-spacing:0.544px;">编 辑 | {{EDITOR}}</span>
+    </p>
+    <p style="margin-bottom:unset;color:#222222;letter-spacing:0.544px;font-size:16px;line-height:1.5em;">
+        <span style="color:#888888;font-size:12px;letter-spacing:0.544px;">责 编（一审） | 孙舒</span>
+    </p>
+    <p style="margin-bottom:unset;color:#222222;letter-spacing:0.544px;font-size:16px;line-height:1.5em;">
+        <span style="color:#888888;font-size:12px;">责 审（二审） | 吴昕灿</span>
+    </p>
+    <p style="margin-bottom:unset;color:#222222;letter-spacing:0.544px;font-size:16px;line-height:1.5em;">
+        <span style="color:#888888;font-size:12px;">终 核（三审） | 武德力</span>
+    </p>
+</section><!-- ===== 底部关注引导图（从往期已发布文章复制）===== -->
+<section>
+    <p style="margin-top:8px;margin-bottom:8px;">
+        <img src="{{FOOTER_GIF}}" data-type="gif" style="width:100%;display:block;border-radius:initial;" data-width="100%"/>
+    </p>
+</section>
