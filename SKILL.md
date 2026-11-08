@@ -107,6 +107,45 @@ python scripts/auto_fix.py <article.html> --json             # 机器可读
 - **出稿前查过 `references/style-cases.md` 同题材指纹**：小标题语气、段均字数、开篇收尾要和院内历史稿一脉相承，不套外部审美
 - 文字不臆造领导姓名、数据、时间；绝对化表述（最/第一）禁用
 
+## 历史稿参考体系（三层，写稿 / 点评 / 改稿都用）
+
+"像不像本院稿"的标准来自 **342 篇历史已发布推文**，不是外部审美。三层参考，**永远从最轻的一层开始**，别一上来读 HTML：
+
+| 层 | 位置 | 体积 | 什么时候用 | 怎么用 |
+|---|---|---|---|---|
+| ① 结构速查 | `references/style-cases.md` | 15 KB | **每次写稿、每次点评** | 直接读，找同题材那 1–2 篇的指纹：小标题语气 / 段均字数 / 色值字号 / 开篇收尾 / 落款格式 |
+| ② 精华原文 | `assets/examples/`（10 篇） | 620 KB | 要抠完整 inline style 参数 | 按 `INDEX.md` 定位后 `grep` 取属性，**不要整篇读**（单篇最大 200 KB，读进来几万 token） |
+| ③ 全量归档 | `assets/archive/`（342 篇） | 1.7 MB | 要找回某篇具体文章 / 要看它当年真实长什么样 | `render_archive.py` 检索 + 渲染 |
+
+### 命令速查
+
+```bash
+python scripts/render_archive.py list 秋              # 按标题关键词检索（可加题材：list 秋 风景时节）
+python scripts/render_archive.py list "" 风景时节      # 只按题材列
+python scripts/render_archive.py cat 186              # 打印正文 HTML（看具体 style 用这个，比 grep 方便）
+python scripts/render_archive.py render 186           # 解压 + 渲染成公众号长图 + 逐屏截图
+python scripts/render_archive.py render 雪 outdir/    # 指定输出目录
+python scripts/render_archive.py render 186 --no-shot  # 只要 HTML 不要截图
+```
+
+`render` 产出到 `案例渲染/<编号>-<标题>/`：`渲染页.html`（模拟公众号页）、`整页.png`（长图）、`screen1..N.png`（每屏 812px，逐屏看用）。
+
+### 已知限制（别踩）
+
+- **归档没有发布日期**：批量下载时文件时间被统一成同一天，年份只能从标题里抠（342 篇中 86 篇有）。要精确时间就回原始存档目录看。
+- **题材分类是关键词匹配**：60 篇落在"其他"，检索优先用 `list <关键词>`，别只翻 `INDEX.md`。
+- **`render` 依赖本机 Chrome**：路径硬编码在 `render_preview.py` 的 `CHROME` 常量；没有 Chrome 就退回 `cat` 看正文。
+- **图片是远程 mmbiz 直链**：渲染需联网。断网时排版/色块/文字正常，照片空白——不影响看结构。
+- **渲染产物只给自己看**：`渲染页.html` / `整页.png` / `screen*.png` 属内部分析素材，交付仍受开头「交付形态铁律」约束。
+
+### 存档更新后重建
+
+```bash
+python scripts/build_archive.py [历史存档目录]   # 全量归档（默认 D:\Desktop\推文），题材词表在文件头 GENRES
+python scripts/build_examples.py [历史存档目录]  # 10 篇精华版，换批次改 PICKS 列表
+python scripts/build_style_cases.py              # 由 examples 重建 style-cases.md（改完必跑）
+```
+
 ## 参考文件
 
 - `references/standards.md` — 完整规范速查（格式表/落款/组件/五类文风/标题风格）
