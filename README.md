@@ -1,8 +1,19 @@
-# 浙东院推文 skill（zhedongyuan-tuiwen）
+<div align="center">
+  <img src="_icon.png" width="96" height="96" alt="zhedongyuan-tuiwen">
+  <h1>浙东院推文 skill（zhedongyuan-tuiwen）</h1>
+  <p>浙江东方职业技术学院公众号推文<br><b>排版体检 · 五维评分 · 读稿点评 · 自动优化 · 标准出稿</b></p>
+  <p>
+    <img alt="license" src="https://img.shields.io/badge/license-MIT-2f6fed">
+    <img alt="python" src="https://img.shields.io/badge/python-3.8%2B-3776ab">
+    <img alt="deps" src="https://img.shields.io/badge/dependencies-0-1f9d55">
+    <img alt="skill" src="https://img.shields.io/badge/agent--skill-compatible-2870a8">
+    <img alt="baseline" src="https://img.shields.io/badge/calibrated%20on-342%20articles-e08a2d">
+  </p>
+</div>
 
-> 浙江东方职业技术学院公众号推文的 **排版体检 · 五维评分 · 读稿点评 · 自动优化 · 标准出稿** —— 一个开箱即用的 Agent Skill（WorkBuddy / Agent Skills 规范）。
+---
 
-规范出处：《采编部教程》+ **342 篇历史已发布推文实证**（评分基线、样式库、组件库全部从真实存档中挖掘标定）。
+> 一个开箱即用的 Agent Skill（WorkBuddy / [Agent Skills 规范](https://agentskills.io)）。规范出处：《采编部教程》+ **342 篇历史已发布推文实证**（评分基线、样式库、组件库全部从真实存档中挖掘标定）。
 
 ---
 
@@ -58,6 +69,20 @@ python scripts/score_article.py 文章.html            # 完整评分卡 + 编�
 python scripts/auto_fix.py 文章.html                 # → 文章-fixed.html + 前后对比
 python scripts/auto_fix.py 文章.html --flatten       # 深度：剥背景图/旋转/flex，防粘贴散架
 ```
+
+## 💬 在对话里怎么用
+
+装好之后不用记命令，直接说人话，技能会自己选模式：
+
+| 你说 | 走哪条 |
+|---|---|
+| 「这篇推文符合规范吗」→ 丢 HTML 或文件路径 | ① 体检 |
+| 「给这篇打个分」「哪篇写得好」 | ② 评分 |
+| 「点评这篇」「读者看着怎么样」 | ③ 读稿点评（渲染逐屏 + 文字点评） |
+| 「帮我按规范改一遍」「能自动修的都修了」 | ④ 自动优化（修完自动复检） |
+| 「写一篇迎新晚会的推文」+ 文字和图片 | ⑤ 标准出稿 |
+
+**交付约定**：点评一律是**文字**，按屏分段说观感，不给你发截图；只有你明确说"出个点评页/做张评分图"才会产出图片。推文 HTML、手机预览页属于正常交付物。
 
 ## 📖 模式教程
 
