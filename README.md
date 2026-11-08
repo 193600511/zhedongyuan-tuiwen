@@ -25,7 +25,7 @@
 | ② 五维评分 | 这篇好不好、差在哪？ | `score_article.py` |
 | ③ 读稿点评 | 按读者视角看，观感如何？ | `render_preview.py` + 评分 |
 | ④ 自动优化 | 不合规的地方帮我修掉 | `auto_fix.py` |
-| ⑤ 标准出稿 | 直接产出一篇合规推文 | SKILL.md 模式三 |
+| ⑤ 标准出稿 | 直接产出一篇合规推文 | SKILL.md 模式五 |
 
 **特色：**
 
@@ -168,7 +168,7 @@ python scripts/auto_fix.py article.html --json
 
 ```
 zhedongyuan-tuiwen/
-├── SKILL.md                      # 技能主文档（四模式 + 交付铁律）
+├── SKILL.md                      # 技能主文档（五模式 + 交付铁律）
 ├── _icon.png                     # 技能图标
 ├── scripts/
 │   ├── check_article.py          # 排版体检
