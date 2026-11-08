@@ -117,6 +117,8 @@ python scripts/auto_fix.py <article.html> --json             # 机器可读
 - `scripts/score_article.py` — 评分脚本（100 分制五维，支持 --brief/--json/--html 评分卡）
 - `scripts/render_preview.py` — 读稿渲染（模拟公众号文章页 + 整页长图 + 812px 逐屏截图，点评前必跑）
 - `scripts/auto_fix.py` — 自动优化（按学院规范自动修格式/落款/清理，修完自动复检打分）
+- `scripts/build_examples.py [历史存档目录]` — 从历史推文存档重建 `assets/examples/` 代表稿档案（默认 `D:\Desktop\推文`；**换选题批次时改 PICKS 列表**）
+- `scripts/build_style_cases.py` — 由 `assets/examples/` 重建 `references/style-cases.md`（加新档案后必须跑一遍）
 - `assets/template.html` — 标准出稿模板（占位符替换即用）
 - `assets/components/` — 基础组件库（素面段落/双图拼版/落款/头图尾图，自存档原文提取）
 - `assets/components/gallery/` — 历史样式组件库（403 个 V3 纯样式组件 + index.json，2026-11-05）
