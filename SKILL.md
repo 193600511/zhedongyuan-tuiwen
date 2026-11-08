@@ -62,7 +62,7 @@ python scripts/score_article.py <article.html> --html score.html   # 可视化�
 
 1. 先渲染：`python scripts/render_preview.py <article.html> <outdir> "标题"`——产出模拟公众号文章页 + 整页长图 + 逐屏截图（每屏 812px，自动算屏数）。
 2. **逐屏 Read 每一张 screenN.png**，像读者一样往下滑，记录每一屏看到了什么、哪里别扭、哪里好看。
-3. 点评以**观感语言**为主（"这一屏只有一句话""字突然大了一圈""圆点悬在那里像误留的墨点"），style 属性只作佐证，不得用 `text-align:right`、`background-image` 这类代码术语当点评主体。**判"不像院内稿"时必须给出对照依据**：调 `references/style-cases.md` 里同题材的历史稿，点明差在哪（小标题不会起 / 段落太长 / 落款格式不同 / 配色出圈），而不是泛泛说"不够好看"。
+3. 点评以**观感语言**为主（"这一屏只有一句话""字突然大了一圈""圆点悬在那里像误留的墨点"），style 属性只作佐证，不得用 `text-align:right`、`background-image` 这类代码术语当点评主体。**判"不像院内稿"时必须给出对照依据**：调 `references/style-cases.md` 里同题材的历史稿，点明差在哪（小标题不会起 / 段落太长 / 落款格式不同 / 配色出圈），而不是泛泛说"不够好看"；需要视觉对照时 `python scripts/render_archive.py render <编号>` 把历史稿也渲染出来并排比。
 4. 代码层分析（体检/评分）放在观感之后作补充；发布风险（模板依赖 background-image/flex/rotate 会被公众号编辑器过滤）必须翻译成人话后果（"信纸底消失、相框摆正、装饰错位"）。
 5. **交付形态：直接在对话里用文字给点评**——按屏分段说。不生成点评 HTML、不做点评稿截图、不把点评渲染成图片（见开头「交付形态铁律」）。渲染截图是给自己看稿用的依据，不是交付物；只有用户明确说"出个点评页/发群里用的图"才做。
 
@@ -89,6 +89,7 @@ python scripts/auto_fix.py <article.html> --json             # 机器可读
 
 1. **判稿型**：按 references/standards.md §5 定稿型（新闻/通知/风景/预告/人物），套对应结构与语气。
 2. **查同类历史稿（必做，不得跳过）**：读 `references/style-cases.md`，找**同题材**那 1–2 篇的指纹——小标题语气、段均字数、色值/字号/行距、开篇与收尾写法。需要看完整 inline style 参数时，再 `grep` 对应的 `assets/examples/*.html`（**别整篇读，单篇最大 200 KB**）。同类稿的骨架优先于通用审美；用户说「参考之前的文章」时，直接从这里取同题材稿比对。
+   - **要看历史稿真实长什么样**：`python scripts/render_archive.py list <关键词>` 检索全量 342 篇归档 → `render <编号>` 解压渲染成公众号长图 + 逐屏截图（原图可加载）。归档索引在 `assets/archive/INDEX.md`。
 3. **选风格与样式**：按 references/style-library.md 的稿型风格画像出稿；**样式组件优先从 `assets/components/gallery/`（403 个 356 篇存档 V3 纯样式组件：text 236 / block 151 / card 12 / cut-gradient 2 / svg-art 2，index.json 索引）挑选**，替换文字/图片占位后使用；基础组件（素面段落/双图拼版/落款/头尾图）从 assets/components/ 取。配色从 style-library §2 实证色板选（学院蓝/党建红/黑灰）。用户说「用之前公众号里的样式」即指 gallery 库。
 4. **取素材**：图片不足或缺失头图/底部关注图时，向用户要学校「滑动 Logo」动图与底部关注引导图（通常从往期文章复制）；其余图直接用用户提供的路径/链接。
 5. **填模板**：复制 assets/template.html 到工作目录替换占位符；排版参数不变（17px/1.75/字距0/缩进2em/justify/图片8px）。
@@ -112,6 +113,9 @@ python scripts/auto_fix.py <article.html> --json             # 机器可读
 - `references/style-library.md` — 342 篇实证样式库（稿型风格画像/配色色板/字号实证/组件索引）
 - `references/style-cases.md` — **10 篇历史代表稿的结构速查**（题材/字数/段数/段均字/色值/字号/行距/圆角 + 小标题原文 + 开篇收尾原文 + 落款格式），出稿与点评前先读这份，14 KB
 - `assets/examples/` — 10 篇历史代表稿全文档案（正文 HTML，inline style 原样保留，图片替换为 `<!--IMG-->` 占位；`INDEX.md` 是题材索引）。**用 grep 取参数，不要整篇读**
+- `assets/archive/` — **342 篇历史推文全量归档**（正文 gzip，共 1.7 MB；`INDEX.md` 按题材分组，`manifest.json` 机读清单）。查/看/渲染入口：`scripts/render_archive.py`（list / cat / render）
+- `scripts/build_archive.py [源目录]` — 从历史存档目录重建全量归档（默认 `D:\Desktop\推文`；分类词表在文件头 GENRES）
+- `scripts/render_archive.py` — 归档使用入口：`list [关键词] [题材]` 检索、`cat <编号>` 看正文 HTML、`render <编号|关键词> [outdir]` 渲染成公众号长图 + 逐屏截图（remote 图可直接加载，已实测）
 - `references/scoring-rubric.md` — 评分标准（五维权重/稿型自适应/等级阈值/标定数据/设计纪律）
 - `scripts/check_article.py` — 体检脚本（可独立运行，支持 --json/--strict）
 - `scripts/score_article.py` — 评分脚本（100 分制五维，支持 --brief/--json/--html 评分卡）
