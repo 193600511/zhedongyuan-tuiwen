@@ -90,9 +90,11 @@ def fix_style(style, kind, cn, changes):
         elif not fs and is_para:
             st['font-size'] = '17px'; changes['正文段补字号17px'] += 1
 
-    # 2 行距（em/倍数 >1.8 拉回 1.75）
+    # 2 行距（缺失补 1.75；em/倍数 >1.8 拉回 1.75）
     lh = st.get('line-height')
-    if has_text and lh:
+    if is_para and not lh:
+        st['line-height'] = '1.75'; changes['正文段补行距1.75'] += 1
+    elif has_text and lh:
         m = re.match(r'([\d.]+)\s*(em)?', lh)
         if m and float(m.group(1)) > 1.8:
             st['line-height'] = '1.75'; changes['行距→1.75'] += 1
@@ -261,7 +263,7 @@ def auto_fix(path, out_path, flatten=False, strip_head=False, as_json=False):
     changes = {}
     notes = []
     FLATTEN[0] = flatten
-    for k in ['正文段字号→17px', '正文段补字号17px', '行距→1.75', '字距→0', '补缩进2em', '缩进→2em',
+    for k in ['正文段字号→17px', '正文段补字号17px', '正文段补行距1.75', '行距→1.75', '字距→0', '补缩进2em', '缩进→2em',
               '右对齐→justify', '对齐→justify', '纯黑→#3e3e3e', '删font-family', '图片容器补margin8px',
               'img补block/max-width', '剥背景图', '去旋转', 'flex→block', '落款二审纠字',
               '补落款二审行', '补落款三审行', '删编辑器残留class', '剥!important', '删开头超大标题块']:

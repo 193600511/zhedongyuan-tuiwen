@@ -15,6 +15,8 @@
 | 对齐 | **成段文字一律 text-align:justify（两端对齐）**——右对齐/居中/左对齐的成段正文都是硬伤，auto_fix 自动归一；图注/落款居中不受影响 |
 | 图片数量 | ≤10 张（只数真实照片，模板装饰图/gif 图标不计） |
 | 禁用 | 纯黑 #000 文字色（用 #3e3e3e 系）、过多 !important、class="_editor" 残留 |
+| 图片边框 | **头图（滑动 Logo / 校徽 gif）一律不加边框/描边**（2026-11-08 定）|
+| 装饰边框 | **风景/时节类不套虚线、点线线条框**（正文段与图片都不要）——替代方案用历史实证样式：①文字块 = 米底卡 `background:#f5efe8;border-left:4px solid #b79481;border-radius:12px;padding:16px`（左竖线，源：秋染东方）②照片 = 白边相框 `padding:8px 8px 14px;background:#fff;box-shadow:0 4px 12px #0000001a`，宽 92% 居中 ③小节标题 = 同款米底色块 + 18px 加粗 #7a5c52（2026-11-08 定）|
 
 342 篇历史推文实证：justify 342/342、letter-spacing:0 339/342、17px 正文主流。
 
