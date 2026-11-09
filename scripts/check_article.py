@@ -112,7 +112,7 @@ def check(path):
 
     # ---------- 2. 字体 ----------
     if re.search(r'font-family', s, re.I):
-        fatal.append('出现 font-family（规范要求系统默认字体，不得指定字体）')
+        fatal.append('出现字体声明（规范要求用系统默认字体，不得指定字体）')
 
     # ---------- 3. 行距 / 字距 / 缩进 / 对齐 ----------
     n = len(paras)
@@ -125,8 +125,8 @@ def check(path):
         no_jus = sum(1 for st in body_paras if 'justify' not in st)
         if bad_lh: warn.append(f'{bad_lh}/{n} 个正文段落行距非 1.75')
         if bad_ls: warn.append(f'{bad_ls}/{n} 个正文段落字间距非 0')
-        if no_ind: warn.append(f'{no_ind}/{len(body_paras)} 个 17px 正文段缺首行缩进 text-indent:2em')
-        if no_jus: warn.append(f'{no_jus}/{len(body_paras)} 个 17px 正文段未两端对齐 text-align:justify')
+        if no_ind: warn.append(f'{no_ind}/{len(body_paras)} 个 17px 正文段缺首行缩进')
+        if no_jus: warn.append(f'{no_jus}/{len(body_paras)} 个 17px 正文段未两端对齐')
     else:
         info.append('未解析到典型正文段落（纯图推文可忽略行距/缩进检查）')
 
@@ -174,17 +174,17 @@ def check(path):
     seg = re.findall(r'<(section|p)[^>]*style="([^"]*)"[^>]*>\s*(?:<[^>]+>\s*)*<img', raw)
     no8 = [st for tag, st in seg if 'margin:8px' not in st.replace(' ', '')]
     if seg and len(no8) == len(seg):
-        warn.append('图片容器均未见 margin:8px（规范要求图片段前/段后距 8px）')
+        warn.append('图片容器均未见上下留白（规范要求段前/段后各 8px）')
     elif no8:
-        info.append(f'{len(no8)}/{len(seg)} 个图片容器未显式声明 margin:8px（继承外层样式可忽略）')
+        info.append(f'{len(no8)}/{len(seg)} 个图片容器未显式声明上下留白 8px（继承外层样式可忽略）')
 
     # ---------- 6. 编辑器残留 ----------
     n_cls = len(re.findall(r'class="_editor"', raw))
     if n_cls:
-        info.append(f'{n_cls} 处 class="_editor" 为编辑器残留，无实际作用，建议清理')
+        info.append(f'{n_cls} 处编辑器残留标记，无实际作用，建议清理')
     n_imp = len(re.findall(r'!important', raw))
     if n_imp > 8:
-        warn.append(f'{n_imp} 处 !important，易与编辑器默认样式冲突')
+        warn.append(f'{n_imp} 处强制优先级样式，易与编辑器默认样式冲突')
     if re.search(r'(?:^|[\s:;])color\s*:\s*#000\b', s, re.I | re.M):
         warn.append('存在纯黑 #000 文字色，建议改 #3e3e3e 系')
     if re.search(r'viewbox=', raw):

@@ -202,11 +202,11 @@ def score(path):
     elif fs_main:
         cut(8, f'正文字号主流 {fs_main}px，规范 17px')
     elif paras:
-        cut(6, '正文段未声明 font-size，靠继承/默认（手机端通常落到 15–16px）')
+        cut(6, '正文段未声明字号，靠继承/默认（手机端通常落到 15–16px）')
     else:
         cut(3, '未解析到正文内容（纯图推文或模板未填充）')
     if re.search(r'font-family', s, re.I):
-        cut(4, '出现 font-family，规范要求系统默认字体')
+        cut(4, '出现字体声明，规范要求用系统默认字体')
 
     n = len(paras)
     if n:
@@ -233,13 +233,13 @@ def score(path):
             if odd_ind:
                 cut(1, '首行缩进用了 ' + '/'.join(v + 'em' for v in odd_ind) + '，规范 2em')
             elif not has_ind and no_ind == len(body_st):
-                cut(2, '17px 正文段整体缺 text-indent:2em')
+                cut(2, '17px 正文段整体缺首行缩进 2em')
             elif has_ind and no_ind:
                 cut(1, f'{no_ind}/{len(body_st)} 段未直接声明缩进（可能继承父级）')
             if right_hits:
-                cut(2, f'{len(right_hits)} 处正文右对齐（中文成段右对齐难读，改 justify）')
+                cut(2, f'{len(right_hits)} 处正文右对齐（中文成段右对齐难读，应改两端对齐）')
             elif not has_jus and no_jus == len(body_st):
-                cut(2, '17px 正文段未两端对齐 justify')
+                cut(2, '17px 正文段未两端对齐')
             elif has_jus and no_jus:
                 cut(1, f'{no_jus}/{len(body_st)} 段未直接声明对齐（可能继承父级）')
     if len(photos) > MAX_IMAGES:
@@ -481,29 +481,29 @@ def _issue_text(reason, r):
         return ('fontsize', '字号不对', 'hard',
                 f'全篇正文主流是 {fs}px，学院硬规范是 17px。这不是审美问题——17px 是 342 篇实证下来'
                 f'手机端最耐读的字号。改法：全选正文统一设 17px，图注 12px、小标题 18–24px 保留。')
-    if _kw(reason, '未声明 font-size'):
+    if _kw(reason, '未声明字号', '未声明 font-size'):
         return ('nofontsize', '正文没设字号', 'hard',
                 '正文段没有显式声明字号，全靠继承或编辑器默认——在手机上通常落到 15–16px，'
-                '微信不同机型还会不一样。给每段正文补 font-size:17px，这是唯一能保证全平台一致的做法。')
-    if _kw(reason, 'font-family'):
+                '微信不同机型还会不一样。给每段正文补上字号 17px，这是唯一能保证全平台一致的做法。')
+    if _kw(reason, '字体声明', 'font-family'):
         return ('fontfamily', '指定了字体', 'hard',
-                '出现 font-family。微信在 iOS 和安卓上会各自替换成系统字体，指定了也不生效，'
+                '指定了字体。微信在 iOS 和安卓上会各自替换成系统字体，写了也不生效，'
                 '反而容易出现「安卓好看、苹果变形」。全部删掉，交给系统默认。')
     if _kw(reason, '未使用行距', '行距非'):
         return ('lineheight', '行距不够', 'hard',
-                '正文行距没到 1.75，字挤在一起读三行就串行。给正文段统一加 line-height:1.75——'
+                '正文行距没到 1.75，字挤在一起读三行就串行。给正文段统一加上行距 1.75——'
                 '这是全院 342 篇的基准值，也是《采编部教程》里的要求。')
     if _kw(reason, '字间距'):
         return ('letterspacing', '字被撑开了', 'soft',
-                'letter-spacing 不是 0。字距一撑开，一行能放的字变少，段落显得松散。'
+                '字距不是 0。字距一撑开，一行能放的字变少，段落显得松散。'
                 '正文段统一回 0，需要呼吸感用段间距解决，不是字距。')
-    if _kw(reason, 'text-indent', '缺 text-indent', '缩进'):
+    if _kw(reason, '首行缩进', 'text-indent', '缩进'):
         return ('indent', '首行没缩进', 'soft',
-                '中文正文习惯首行空两格。给 17px 正文段补 text-indent:2em；'
+                '中文正文习惯首行空两格。给 17px 正文段补上首行缩进 2em；'
                 '标题、图注、金句不缩进，缩进只给成段的正文。')
-    if _kw(reason, 'justify', '两端对齐'):
+    if _kw(reason, '两端对齐', 'justify'):
         return ('justify', '右边缘参差', 'soft',
-                '正文段没设 text-align:justify，右边缘会参差不齐。补上 justify，两端对齐后整块文字更齐整。')
+                '正文段没设两端对齐，右边缘会参差不齐。补上两端对齐后，整块文字更齐整。')
     if _kw(reason, '超过建议上限'):
         return ('toomanyimg', '图放太多了', 'soft',
                 f'正文 {_n(reason, r"(?:图片|照片)\s*(\d+)\s*张", int, "?")} 张照片，超过建议的 10 张。'
@@ -511,8 +511,8 @@ def _issue_text(reason, r):
                 '必须都留就做拼图。')
     if _kw(reason, '右对齐'):
         return ('rightalign', '正文右对齐', 'hard',
-                '成段正文用了 text-align:right。中文成段右对齐，每行起笔位置都不同，读三行就找不到下一行开头；'
-                '模板的杂志风可以保留标题和图片，但成段文字一律改 justify。')
+                '成段正文用了右对齐。中文成段右对齐，每行起笔位置都不同，读三行就找不到下一行开头；'
+                '模板的杂志风可以保留标题和图片，但成段文字一律改两端对齐。')
     if _kw(reason, '开头缺头图'):
         return ('nohead', '开头没有头图', 'soft',
                 '正文一上来就是字，缺了滑动 Logo / 主视觉。往期都是「头图 → 正文」的顺序，'

@@ -4,7 +4,7 @@
 用法：
   python auto_fix.py <article.html>                    # 修复并写回 <stem>-fixed.html，打印前后对比
   python auto_fix.py <article.html> --out out.html     # 指定输出路径
-  python auto_fix.py <article.html> --flatten          # 深度模式：模板降级（剥背景图/旋转/flex），保住粘贴不散架
+  python auto_fix.py <article.html> --flatten          # 深度模式：模板降级（剥背景图/旋转/弹性布局），保住粘贴不散架
   python auto_fix.py <article.html> --strip-head       # 删除开头超大标题装饰块（默认关，防误删）
   python auto_fix.py <article.html> --json             # 机器可读修复清单
 
@@ -13,12 +13,12 @@
   2 行距归一 1.75（em/倍数 >1.8 的都拉回）
   3 字间距非 0 → 0
   4 首行缩进 → 2em（缺失补、非 2em 纠正）
-  5 成段右对齐 → justify；未声明对齐 → justify
+  5 成段右对齐 → 两端对齐；未声明对齐 → 两端对齐
   6 纯黑 #000 文字 → #3e3e3e
-  7 图片容器 margin:8px 0（缺失补）；img 补 display:block + max-width:100%
+  7 图片容器上下留白 8px（缺失补）；图片补块级显示 + 最大宽度 100%
   8 落款：二审「责 编」误写 → 「责 审」；缺失三审行按标准补插（来源/编辑姓名不臆造，只在报告提示）
-  9 剥 !important；删 class="_editor" 编辑器残留
- 10 --flatten：剥 background-image（留底色）、transform:rotate、display:flex→block
+  9 剥强制优先级样式；删编辑器残留标记
+ 10 --flatten：剥背景图（留底色）、剥旋转、弹性布局降级为块级
 设计原则：与 check_article.py 同口径，修完保证体检零致命；只动样式与结构事实，不改一个字的文案。
 """
 import io, json, os, re, subprocess, sys, tempfile
@@ -34,6 +34,7 @@ IMG_RE = re.compile(r'<img\b[^>]*>', re.I)
 
 FLATTEN = [False]  # 模板降级开关（fix_style 内读取）
 
+TAIL_N = 8000  # 落款检测窗口：窗口太短会把「落款后面还有空行和底部关注图」的稿子误判成缺行
 SIGN_ROW_STYLE = 'font-size:12px;color:#888888;line-height:1.75;letter-spacing:0;'
 SIGN_FIX = [
     # (匹配, 替换) —— 二审误写成责编
@@ -120,9 +121,9 @@ def fix_style(style, kind, cn, changes):
     if fs_scope:
         al = st.get('text-align')
         if al == 'right':
-            st['text-align'] = 'justify'; changes['右对齐→justify'] += 1
+            st['text-align'] = 'justify'; changes['右对齐→两端对齐'] += 1
         elif al != 'justify':
-            st['text-align'] = 'justify'; changes['对齐→justify'] += 1
+            st['text-align'] = 'justify'; changes['对齐→两端对齐'] += 1
 
     # 6 纯黑
     col = st.get('color')
@@ -131,11 +132,11 @@ def fix_style(style, kind, cn, changes):
 
     # 6.5 font-family（规范禁指定字体）
     if 'font-family' in st:
-        st.pop('font-family'); changes['删font-family'] += 1
+        st.pop('font-family'); changes['删指定字体'] += 1
 
     # 7 纯图容器边距
     if kind == 'imgbox' and 'margin' not in st:
-        st['margin'] = '8px 0'; changes['图片容器补margin8px'] += 1
+        st['margin'] = '8px 0'; changes['图片容器补上下留白8px'] += 1
 
     # 10 模板降级
     if FLATTEN[0]:
@@ -146,7 +147,7 @@ def fix_style(style, kind, cn, changes):
             elif k.endswith('transform') and 'rotate' in v:
                 st.pop(k); changes['去旋转'] += 1
             elif k == 'display' and v == 'flex':
-                st[k] = 'block'; changes['flex→block'] += 1
+                st[k] = 'block'; changes['弹性布局→块级'] += 1
 
     return style_to_str(st)
 
@@ -174,7 +175,7 @@ def fix_signature(html, changes, notes):
         if n:
             html = pat.sub(rep, html)
             changes['落款二审纠字'] += n
-    tail = html[-2600:]
+    tail = html[-TAIL_N:]
     plain = re.sub(r'<[^>]+>', '', tail)
     need = [('二审', r'责\s*审.{0,6}二\s*审|责\s*审（二审）'), ('三审', r'终\s*[核审].{0,6}三\s*审')]
     # 找一审行 </p> 位置作为插队点
@@ -185,17 +186,17 @@ def fix_signature(html, changes, notes):
         html = html[:pos] + row + html[pos:]
         changes['补落款二审行'] += 1
         plain = plain  # 已补
-    if not re.search(need[1][1], re.sub(r'<[^>]+>', '', html[-2600:])):
+    if not re.search(need[1][1], re.sub(r'<[^>]+>', '', html[-TAIL_N:])):
         # 找二审行（可能是刚补的）
-        m2 = re.search(r'<p\b[^>]*>[^<]*(?:责\s*审|责\s*编)[^<]*二\s*审[^<]*</p>', html[-2600:], re.I)
+        m2 = re.search(r'<p\b[^>]*>[^<]*(?:责\s*审|责\s*编)[^<]*二\s*审[^<]*</p>', html[-TAIL_N:], re.I)
         if m2:
             row = '\n    <p style="%s">终 核（三审） | 武德力</p>' % SIGN_ROW_STYLE
-            pos = len(html) - 2600 + m2.end()
+            pos = len(html) - TAIL_N + m2.end()
             html = html[:pos] + row + html[pos:]
             changes['补落款三审行'] += 1
-    if not re.search(r'来\s*源', html[-2600:]):
+    if not re.search(r'来\s*源', plain):
         notes.append('落款缺「来 源」行——不知道供稿部门，未臆造，请补')
-    if not re.search(r'编\s*辑|发\s*布', html[-2600:]):
+    if not re.search(r'编\s*辑|发\s*布', plain):
         notes.append('落款缺「编 辑」行——不知道撰稿人姓名，未臆造，请补')
     return html
 
@@ -222,7 +223,7 @@ def cleanup(html, changes):
     n = len(CLASS_RE.findall(html))
     if n:
         html = CLASS_RE.sub(' ', html)
-        changes['删编辑器残留class'] += n
+        changes['删编辑器残留标记'] += n
     return html
 
 
@@ -249,7 +250,7 @@ def fix_imgs(html, changes):
                 add += 'max-width:100%;'
         if add:
             st = (st.rstrip(';') + ';' + add).lstrip(';')
-            changes['img补block/max-width'] += 1
+            changes['图片补块级显示与最大宽度'] += 1
         if st == (orig or ''):
             return tag
         if 'style="' in tag:
@@ -264,9 +265,9 @@ def auto_fix(path, out_path, flatten=False, strip_head=False, as_json=False):
     notes = []
     FLATTEN[0] = flatten
     for k in ['正文段字号→17px', '正文段补字号17px', '正文段补行距1.75', '行距→1.75', '字距→0', '补缩进2em', '缩进→2em',
-              '右对齐→justify', '对齐→justify', '纯黑→#3e3e3e', '删font-family', '图片容器补margin8px',
-              'img补block/max-width', '剥背景图', '去旋转', 'flex→block', '落款二审纠字',
-              '补落款二审行', '补落款三审行', '删编辑器残留class', '剥!important', '删开头超大标题块']:
+              '右对齐→两端对齐', '对齐→两端对齐', '纯黑→#3e3e3e', '删指定字体', '图片容器补上下留白8px',
+              '图片补块级显示与最大宽度', '剥背景图', '去旋转', '弹性布局→块级', '落款二审纠字',
+              '补落款二审行', '补落款三审行', '删编辑器残留标记', '剥强制样式', '删开头超大标题块']:
         changes[k] = 0
 
     # 1 落款（文本层）
@@ -282,7 +283,7 @@ def auto_fix(path, out_path, flatten=False, strip_head=False, as_json=False):
         cn = len(CN.findall(text))
         style = get_style(attrs)
         if style and '!important' in style.lower():
-            changes['剥!important'] += len(re.findall(r'!important', style, re.I))
+            changes['剥强制样式'] += len(re.findall(r'!important', style, re.I))
         # 元素分类
         has_block_child = bool(re.search(r'<(p|section|div)\b', inner, re.I))
         if nm in INLINE:
