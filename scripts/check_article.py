@@ -14,6 +14,7 @@ ACCEPT_FS = {'12', '13', '14', '15', '16', '17', '18',          # 正文/小注/
              '20', '22', '24', '26', '28', '32'}                # 标题类
 REVIEW = {'一审': '孙舒', '二审': '吴昕灿', '三审': '武德力'}
 MAX_IMAGES = 10
+TAIL_WINDOW = 8000  # 落款检测窗口（与 auto_fix 同口径）
 CN = re.compile(r'[\u4e00-\u9fa5]')
 
 
@@ -145,6 +146,20 @@ def check(path):
         warn.append('三审姓名未见「武德力」（当前固定口径）')
     if re.search(r'责\s*编.{0,4}一\s*审', tail) and not re.search(r'孙舒|于紫梦|衎', tail):
         warn.append('一审姓名未见「孙舒」（当前固定口径）')
+    # 落款带样式检查（2026-11-09 定：五件套一律纯文本，默认样式接管）
+    tail_html = raw[-TAIL_WINDOW:]
+    styled_rows = 0
+    for pm in re.finditer(r'<(p|span)\b([^>]*)>([^<]{0,60}?)</\1>', tail_html, re.S | re.I):
+        row_text = re.sub(r'<[^>]+>', '', pm.group(0))
+        row_text = re.sub(r'\s+', ' ', row_text.replace('&nbsp;', ' ')).strip()
+        if not re.match(r'^(来\s*源|编\s*辑|发\s*布|责\s*[编审]|终\s*[核审])', row_text):
+            continue
+        if len(row_text) > 60:
+            continue
+        if re.search(r'(font-size|color|letter-spacing|line-height|background|border)\s*:', pm.group(2), re.I):
+            styled_rows += 1
+    if styled_rows:
+        warn.append(f'{styled_rows} 处落款行带了样式（学院口径：落款纯文本，默认样式接管）')
 
     # ---------- 5. 图片（与评分器 v1.4 同口径：只数真实照片，装饰图/gif 不计） ----------
     img_tags = re.findall(r'<img\b[^>]*>', raw)

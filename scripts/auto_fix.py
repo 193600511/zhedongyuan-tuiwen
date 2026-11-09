@@ -35,7 +35,6 @@ IMG_RE = re.compile(r'<img\b[^>]*>', re.I)
 FLATTEN = [False]  # 模板降级开关（fix_style 内读取）
 
 TAIL_N = 8000  # 落款检测窗口：窗口太短会把「落款后面还有空行和底部关注图」的稿子误判成缺行
-SIGN_ROW_STYLE = 'font-size:12px;color:#888888;line-height:1.75;letter-spacing:0;'
 SIGN_FIX = [
     # (匹配, 替换) —— 二审误写成责编
     (re.compile(r'责\s*编(\s|&nbsp;)*（\s*二\s*审\s*）'), '责 审（二审）'),
@@ -169,7 +168,7 @@ def collect_elements(html):
 
 
 def fix_signature(html, changes, notes):
-    """落款修正：二审误写纠正 + 缺失三审行补插（来源/编辑姓名不臆造）。"""
+    """落款修正：二审误写纠正 + 缺失三审行补插（来源/编辑姓名不臆造）+ 落款去样式。"""
     for pat, rep in SIGN_FIX:
         n = len(pat.findall(html))
         if n:
@@ -181,7 +180,7 @@ def fix_signature(html, changes, notes):
     # 找一审行 </p> 位置作为插队点
     m1 = re.search(r'<p\b[^>]*>[^<]*责\s*编[^<]*一\s*审[^<]*</p>', tail, re.I)
     if m1 and not re.search(need[0][1], plain):
-        row = '\n    <p style="%s">责 审（二审） | 吴昕灿</p>' % SIGN_ROW_STYLE
+        row = '\n    <p>责 审（二审） | 吴昕灿</p>'
         pos = len(html) - len(tail) + m1.end()
         html = html[:pos] + row + html[pos:]
         changes['补落款二审行'] += 1
@@ -190,10 +189,30 @@ def fix_signature(html, changes, notes):
         # 找二审行（可能是刚补的）
         m2 = re.search(r'<p\b[^>]*>[^<]*(?:责\s*审|责\s*编)[^<]*二\s*审[^<]*</p>', html[-TAIL_N:], re.I)
         if m2:
-            row = '\n    <p style="%s">终 核（三审） | 武德力</p>' % SIGN_ROW_STYLE
+            row = '\n    <p>终 核（三审） | 武德力</p>'
             pos = len(html) - TAIL_N + m2.end()
             html = html[:pos] + row + html[pos:]
             changes['补落款三审行'] += 1
+    # 落款去样式：五件套行一律纯文本 <p>，不挂颜色/字号/字距等任何样式（2026-11-09 定）
+    head_pos = len(html) - TAIL_N if len(html) > TAIL_N else 0
+    tail2 = html[head_pos:]
+
+    def strip_row(m):
+        inner = m.group(2)
+        text = re.sub(r'<[^>]+>', '', inner)
+        text = text.replace('&nbsp;', ' ').replace('&amp;', '&')
+        text = re.sub(r'\s+', ' ', text).strip()
+        if not re.match(r'^(来\s*源|编\s*辑|发\s*布|责\s*[编审]|终\s*[核审])', text):
+            return m.group(0)
+        if len(text) > 60:
+            return m.group(0)
+        if m.group(1) == '<p>' and '<span' not in inner and 'style' not in m.group(0)[:80]:
+            return m.group(0)  # 已经是纯文本行
+        changes['落款去样式'] += 1
+        return '<p>' + text + '</p>'
+
+    tail2 = re.sub(r'(<p\b[^>]*>)(.*?)</p>', strip_row, tail2, flags=re.S | re.I)
+    html = html[:head_pos] + tail2
     if not re.search(r'来\s*源', plain):
         notes.append('落款缺「来 源」行——不知道供稿部门，未臆造，请补')
     if not re.search(r'编\s*辑|发\s*布', plain):
@@ -267,7 +286,7 @@ def auto_fix(path, out_path, flatten=False, strip_head=False, as_json=False):
     for k in ['正文段字号→17px', '正文段补字号17px', '正文段补行距1.75', '行距→1.75', '字距→0', '补缩进2em', '缩进→2em',
               '右对齐→两端对齐', '对齐→两端对齐', '纯黑→#3e3e3e', '删指定字体', '图片容器补上下留白8px',
               '图片补块级显示与最大宽度', '剥背景图', '去旋转', '弹性布局→块级', '落款二审纠字',
-              '补落款二审行', '补落款三审行', '删编辑器残留标记', '剥强制样式', '删开头超大标题块']:
+              '补落款二审行', '补落款三审行', '落款去样式', '删编辑器残留标记', '剥强制样式', '删开头超大标题块']:
         changes[k] = 0
 
     # 1 落款（文本层）
@@ -309,6 +328,7 @@ def auto_fix(path, out_path, flatten=False, strip_head=False, as_json=False):
         html = strip_head_deco(html, changes)
 
     # 6 写出
+    html = html.replace(' style=""', '')  # 清掉归一过程留下的空 style 壳
     io.open(out_path, 'w', encoding='utf-8').write(html)
 
     # 7 复检（临时落盘，直接调用体检器函数）
