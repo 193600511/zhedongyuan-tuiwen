@@ -146,9 +146,10 @@ def check(path):
         warn.append('三审姓名未见「武德力」（当前固定口径）')
     if re.search(r'责\s*编.{0,4}一\s*审', tail) and not re.search(r'孙舒|于紫梦|衎', tail):
         warn.append('一审姓名未见「孙舒」（当前固定口径）')
-    # 落款带样式检查（2026-11-09 定：五件套一律纯文本，默认样式接管）
+    # 落款带样式检查（2026-11-09 定：五件套纯文本，颜色统一历史口径深灰 #3e3e3e）
     tail_html = raw[-TAIL_WINDOW:]
     styled_rows = 0
+    no_color_rows = 0
     for pm in re.finditer(r'<(p|span)\b([^>]*)>([^<]{0,60}?)</\1>', tail_html, re.S | re.I):
         row_text = re.sub(r'<[^>]+>', '', pm.group(0))
         row_text = re.sub(r'\s+', ' ', row_text.replace('&nbsp;', ' ')).strip()
@@ -156,10 +157,21 @@ def check(path):
             continue
         if len(row_text) > 60:
             continue
-        if re.search(r'(font-size|color|letter-spacing|line-height|background|border)\s*:', pm.group(2), re.I):
+        st = pm.group(2)
+        if re.search(r'(letter-spacing|line-height|background|border)\s*:', st, re.I):
+            styled_rows += 1  # 装饰类样式：落款一律不允许
+            continue
+        c = re.search(r'(?<!-)color\s*:\s*([^;"]+)', st, re.I)
+        if not c:
+            no_color_rows += 1  # 无色：编辑器默认纯黑，偏离历史口径
+        elif not re.match(r'\s*(#3e3e3e|#222222|rgb\(62,\s*62,\s*62\)|rgb\(34,\s*34,\s*34\))\s*$', c.group(1), re.I):
+            styled_rows += 1  # 颜色不在历史口径深灰内
+        elif re.search(r'font-size\s*:', st, re.I) and not re.search(r'font-size\s*:\s*16px', st, re.I):
             styled_rows += 1
     if styled_rows:
-        warn.append(f'{styled_rows} 处落款行带了样式（学院口径：落款纯文本，默认样式接管）')
+        warn.append(f'{styled_rows} 处落款行带了历史口径外的样式（学院口径：落款纯文本，颜色只用深灰 #3e3e3e）')
+    if no_color_rows:
+        warn.append(f'{no_color_rows} 处落款行未设颜色（历史口径：落款统一深灰 #3e3e3e，避免默认纯黑）')
 
     # ---------- 5. 图片（与评分器 v1.4 同口径：只数真实照片，装饰图/gif 不计） ----------
     img_tags = re.findall(r'<img\b[^>]*>', raw)

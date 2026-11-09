@@ -193,7 +193,8 @@ def fix_signature(html, changes, notes):
             pos = len(html) - TAIL_N + m2.end()
             html = html[:pos] + row + html[pos:]
             changes['补落款三审行'] += 1
-    # 落款去样式：五件套行一律纯文本 <p>，不挂颜色/字号/字距等任何样式（2026-11-09 定）
+    # 落款去样式：五件套行一律纯文本 <p>，仅统一历史口径深灰色 #3e3e3e，
+    # 不带底色/边框/圆角/装饰（2026-11-09 定；颜色口径取自 342 篇历史稿实测）
     head_pos = len(html) - TAIL_N if len(html) > TAIL_N else 0
     tail2 = html[head_pos:]
 
@@ -206,10 +207,17 @@ def fix_signature(html, changes, notes):
             return m.group(0)
         if len(text) > 60:
             return m.group(0)
-        if m.group(1) == '<p>' and '<span' not in inner and 'style' not in m.group(0)[:80]:
-            return m.group(0)  # 已经是纯文本行
+        if m.group(1) == '<p>' and '<span' not in inner:
+            st = m.group(0)[:80]
+            if 'style' not in st:
+                changes['落款去样式'] += 1
+                return '<p style="color:#3e3e3e">' + text + '</p>'  # 无色行补深灰
+            if re.search(r'(?<!-)color\s*:\s*(#3e3e3e|#222222|rgb\(62,\s*62,\s*62\)|rgb\(34,\s*34,\s*34\))', m.group(2), re.I) and not re.search(r'(font-size|letter-spacing|line-height|background|border)\s*:', m.group(2), re.I):
+                return m.group(0)  # 已符合历史口径
+            changes['落款去样式'] += 1
+            return '<p style="color:#3e3e3e">' + text + '</p>'
         changes['落款去样式'] += 1
-        return '<p>' + text + '</p>'
+        return '<p style="color:#3e3e3e">' + text + '</p>'
 
     tail2 = re.sub(r'(<p\b[^>]*>)(.*?)</p>', strip_row, tail2, flags=re.S | re.I)
     html = html[:head_pos] + tail2
